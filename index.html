@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Archive of My Mind</title>
+<link rel="icon" type="image/x-icon" href="logo.ico">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;500&display=swap');
 
@@ -38,7 +40,9 @@ body {
 /* ── FIXED PILLAR SHAFTS ── */
 .pillar-shaft-fixed {
   position: fixed;
-  top: 0; bottom: 0;
+  /* top is set via JS after header renders; fallback clamp matches pediment height */
+  top: clamp(80px, 13vw, 180px);
+  bottom: 0;
   width: var(--col-w);
   z-index: 40;
   pointer-events: none;
@@ -164,6 +168,32 @@ body {
 /* LOGO SLOT — replace .logo-placeholder with <img src="logo.svg" class="site-logo"> when ready */
 /* Add this CSS when you do: .site-logo { height: 36px; margin-bottom: 8px; display: block; margin: 0 auto 8px; } */
 .logo-placeholder { display: none; }
+
+/* Logo sits centered inside the triangle */
+.pediment-logo-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(80px, 13vw, 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+  /* nudge down slightly from peak so it sits in the middle of the triangle body */
+  padding-top: clamp(16px, 3vw, 40px);
+}
+.site-logo {
+  /* coin-sized: about 52px tall, scales with viewport */
+  height: clamp(36px, 5vw, 56px);
+  width: auto;
+  display: block;
+  /* this removes the white background by blending with whatever is beneath */
+  mix-blend-mode: multiply;
+  /* if the SVG paths are near-black on transparent, multiply on a light bg = perfect */
+  opacity: 0.82;
+}
 
 .site-title {
   font-family: 'Cinzel', serif;
@@ -491,9 +521,13 @@ body {
     <line x1="0" y1="197" x2="1000" y2="197" stroke="rgba(160,124,42,0.25)" stroke-width="1"/>
   </svg>
 
+  <!-- Logo sits inside the triangle, absolutely centered over the pediment SVG -->
+  <div class="pediment-logo-wrap">
+    <img src="logo.svg" class="site-logo" alt="The Archive of My Mind logo">
+  </div>
+
   <!-- Title band -->
   <div class="entablature">
-         <img src="logo.svg" class="site-logo" alt="My logo">
     <div class="site-title">The Archive of My Mind</div>
     <div class="site-subtitle">A personal record of the interior</div>
   </div>
@@ -525,6 +559,17 @@ body {
 </div>
 
 <script>
+
+/* ── SET PILLAR TOP TO MATCH PEDIMENT HEIGHT ──────────────────── */
+function setPillarTop() {
+  const svg = document.querySelector('.pediment-svg');
+  const h = svg ? svg.getBoundingClientRect().height : 0;
+  document.querySelectorAll('.pillar-shaft-fixed').forEach(el => {
+    el.style.top = h + 'px';
+  });
+}
+setPillarTop();
+window.addEventListener('resize', setPillarTop);
 
 /* ── BOOK CONTENT ─────────────────────────────────────────────── */
 const BOOK_CONTENT = {
