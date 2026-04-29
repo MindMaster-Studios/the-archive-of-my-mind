@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Archive of My Mind</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;500&display=swap');
+
+:root {
+  --bg:          #f0f0ee;
+  --bg-mid:      #e4e4e1;
+  --bg-deep:     #d6d6d2;
+  --bg-panel:    #ebebea;
+  --ink:         #18181c;
+  --ink-mid:     #36363e;
+  --ink-light:   #72727e;
+  --ink-faint:   #a8a8b2;
+  --rule:        rgba(50,50,70,0.1);
+  --rule-strong: rgba(50,50,70,0.22);
+  --gold:        #a07c2a;
+  --gold-pale:   #c9a85c;
+  --col-w:       54px;
+  --nav-w:       168px;
+  --ease:        0.32s cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'EB Garamond', Georgia, serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── FIXED PILLAR SHAFTS ── */
+.pillar-shaft-fixed {
+  position: fixed;
+  top: 0; bottom: 0;
+  width: var(--col-w);
+  z-index: 40;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+.pillar-shaft-fixed.left  { left: 0; }
+.pillar-shaft-fixed.right { right: 0; }
+.shaft-inner {
+  width: 26px;
+  height: 100%;
+  background: linear-gradient(90deg, var(--bg-deep) 0%, var(--bg-mid) 18%, var(--bg) 38%, var(--bg-mid) 58%, var(--bg-deep) 80%, var(--bg-panel) 100%);
+  border-left:  1px solid var(--rule-strong);
+  border-right: 1px solid var(--rule-strong);
+  position: relative;
+}
+.shaft-inner::before, .shaft-inner::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: var(--rule);
+}
+.shaft-inner::before { left: 30%; }
+.shaft-inner::after  { right: 30%; }
+
+/* ── NOTECARD NAV ── */
+.nav-rail {
+  position: fixed;
+  left: var(--col-w);
+  top: 0; bottom: 0;
+  width: var(--nav-w);
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.notecards {
+  pointer-events: all;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 18px;
+  max-height: 90vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.notecards::-webkit-scrollbar { display: none; }
+.notecard {
+  padding: 7px 13px 7px 9px;
+  cursor: pointer;
+  background: var(--bg-mid);
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--rule-strong);
+  border-radius: 0 2px 2px 0;
+  max-width: 136px;
+  transform: translateX(-8px);
+  transition: all var(--ease);
+  user-select: none;
+  position: relative;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.04);
+}
+.notecard::before {
+  content: '';
+  position: absolute;
+  left: -3px; top: -1px; bottom: -1px;
+  width: 3px;
+  background: var(--gold);
+  opacity: 0;
+  transition: opacity var(--ease);
+}
+.notecard.active {
+  transform: translateX(6px);
+  background: var(--bg);
+  border-color: rgba(160,124,42,0.5);
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.08);
+}
+.notecard.active::before { opacity: 1; }
+.notecard:hover:not(.active) { transform: translateX(-2px); background: var(--bg); }
+.notecard-text {
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  line-height: 1.4;
+  display: block;
+  transition: color var(--ease);
+}
+.notecard.active .notecard-text { color: var(--gold); }
+
+/* ── HEADER / FACADE ── */
+.site-header { position: relative; width: 100%; z-index: 10; }
+
+.pediment-svg {
+  display: block;
+  width: 100%;
+  height: clamp(80px, 13vw, 180px);
+}
+
+.entablature {
+  width: 100%;
+  background: var(--bg-panel);
+  border-top:    1.5px solid var(--rule-strong);
+  border-bottom: 1.5px solid var(--rule-strong);
+  padding: 18px 0 16px;
+  text-align: center;
+  position: relative;
+}
+.entablature::before {
+  content: '';
+  position: absolute;
+  top: 6px; left: 0; right: 0;
+  height: 1px; background: var(--rule);
+}
+.entablature::after {
+  content: '';
+  position: absolute;
+  bottom: 6px; left: 0; right: 0;
+  height: 1px; background: var(--rule);
+}
+
+/* LOGO SLOT — replace .logo-placeholder with <img src="logo.svg" class="site-logo"> when ready */
+/* Add this CSS when you do: .site-logo { height: 36px; margin-bottom: 8px; display: block; margin: 0 auto 8px; } */
+.logo-placeholder { display: none; }
+
+.site-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(13px, 2.4vw, 24px);
+  font-weight: 400;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--ink);
+  line-height: 1;
+}
+.site-subtitle {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-light);
+  letter-spacing: 0.08em;
+  margin-top: 7px;
+}
+.facade-footer-strip {
+  width: 100%;
+  height: 20px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule);
+}
+
+/* ── PAGE LAYOUT ── */
+.page-wrap { display: flex; margin: 0 var(--col-w); }
+.content {
+  margin-left: var(--nav-w);
+  flex: 1;
+  padding: 48px 64px 100px;
+  max-width: 860px;
+  min-width: 0;
+}
+
+/* ── SECTIONS ── */
+.archive-section { padding-top: 56px; }
+.section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.section-numeral {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(10px, 1.5vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  flex-shrink: 0;
+}
+.section-rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--rule-strong), transparent); }
+
+/* ── BOOKSHELF ── */
+.bookshelf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rule-strong);
+  position: relative;
+}
+.bookshelf::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(180deg, transparent, rgba(50,50,70,0.04));
+  pointer-events: none;
+}
+
+/* ── BOOK SPINES ── */
+.book {
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--ease), box-shadow var(--ease);
+  border-radius: 1px 3px 3px 1px;
+  flex-shrink: 0;
+}
+.book:nth-child(4n+1) { height: 152px; }
+.book:nth-child(4n+2) { height: 172px; }
+.book:nth-child(4n+3) { height: 136px; }
+.book:nth-child(4n)   { height: 162px; }
+.book:nth-child(7n)   { height: 144px; }
+.book:hover { transform: translateY(-9px); box-shadow: 3px 14px 28px rgba(24,24,28,0.18); z-index: 2; }
+
+.book-spine {
+  width: 42px;
+  height: 100%;
+  border-radius: 1px 3px 3px 1px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.book-spine::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+.book-spine::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: rgba(0,0,0,0.2);
+}
+.book::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-pale), rgba(201,168,92,0.25));
+  z-index: 3;
+  border-radius: 1px 3px 0 0;
+}
+.book-spine-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: 'EB Garamond', serif;
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  color: rgba(255,255,255,0.78);
+  text-align: center;
+  padding: 10px 4px;
+  z-index: 1;
+  position: relative;
+  user-select: none;
+  line-height: 1;
+}
+.book[data-color="1"] .book-spine { background: linear-gradient(180deg, #6a4840 0%, #4e3330 100%); }
+.book[data-color="2"] .book-spine { background: linear-gradient(180deg, #42566a 0%, #2e3e50 100%); }
+.book[data-color="3"] .book-spine { background: linear-gradient(180deg, #445a44 0%, #304030 100%); }
+.book[data-color="4"] .book-spine { background: linear-gradient(180deg, #5a4e36 0%, #423824 100%); }
+.book[data-color="5"] .book-spine { background: linear-gradient(180deg, #4e4660 0%, #38304a 100%); }
+.book[data-color="6"] .book-spine { background: linear-gradient(180deg, #365454 0%, #243c3c 100%); }
+.book[data-color="7"] .book-spine { background: linear-gradient(180deg, #5c5236 0%, #443c24 100%); }
+.book[data-color="8"] .book-spine { background: linear-gradient(180deg, #523636 0%, #3c2424 100%); }
+.book[data-color="9"] .book-spine { background: linear-gradient(180deg, #445040 0%, #303a2c 100%); }
+
+/* ── DIVIDER ── */
+.section-divider { display: flex; align-items: center; gap: 14px; padding-top: 10px; }
+.divider-line { flex: 1; height: 1px; background: var(--rule); }
+.divider-ornament { font-size: 10px; color: var(--ink-faint); line-height: 1; }
+
+/* ── FOOTER ── */
+.site-footer { margin: 48px 0 0; padding: 28px 0 0; border-top: 1px solid var(--rule); text-align: center; }
+.footer-mark { font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.1em; }
+
+/* ── MODAL ── */
+#modal-overlay {
+  position: fixed; inset: 0;
+  z-index: 200;
+  background: rgba(18,18,22,0.5);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.28s ease;
+  backdrop-filter: blur(4px);
+  padding: 24px;
+}
+#modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-window {
+  background: var(--bg);
+  width: 100%;
+  max-width: 650px;
+  max-height: 82vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rule-strong);
+  box-shadow: 0 24px 70px rgba(18,18,22,0.28), inset 0 0 0 5px var(--bg-mid), inset 0 0 0 6px var(--rule);
+  transform: translateY(14px) scale(0.98);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+#modal-overlay.open .modal-window { transform: translateY(0) scale(1); }
+.modal-header {
+  padding: 26px 30px 20px;
+  border-bottom: 1px solid var(--rule);
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--bg-panel);
+}
+.modal-section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 5px;
+}
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(18px, 2.8vw, 24px);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.modal-close {
+  background: none; border: none;
+  width: 26px; height: 26px;
+  cursor: pointer;
+  color: var(--ink-light);
+  font-size: 18px;
+  opacity: 0.45;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: serif;
+}
+.modal-close:hover { opacity: 1; }
+.modal-body {
+  overflow-y: auto;
+  padding: 26px 30px 34px;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-deep) var(--bg-mid);
+}
+.modal-body::-webkit-scrollbar { width: 4px; }
+.modal-body::-webkit-scrollbar-track { background: var(--bg-mid); }
+.modal-body::-webkit-scrollbar-thumb { background: var(--bg-deep); border-radius: 2px; }
+.modal-tagline {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-light);
+  border-left: 2px solid var(--gold-pale);
+  padding-left: 14px;
+  margin-bottom: 26px;
+  line-height: 1.65;
+}
+.modal-section-heading {
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 26px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+}
+.modal-section-heading:first-of-type { margin-top: 0; }
+.modal-body p {
+  font-family: 'EB Garamond', serif;
+  font-size: 15.5px;
+  line-height: 1.88;
+  color: var(--ink-mid);
+  margin-bottom: 14px;
+}
+.modal-body p:last-child { margin-bottom: 0; }
+.modal-placeholder-tag {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border: 1px solid var(--rule-strong);
+  padding: 3px 10px;
+  margin-bottom: 20px;
+}
+.modal-body p.placeholder-text { font-style: italic; opacity: 0.5; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  :root { --nav-w: 0px; }
+  .nav-rail { display: none; }
+  .content { margin-left: 0; padding: 32px 28px 80px; }
+}
+@media (max-width: 540px) {
+  :root { --col-w: 20px; }
+  .content { padding: 24px 14px 60px; }
+  .modal-header { padding: 18px 18px 14px; }
+  .modal-body   { padding: 18px 18px 26px; }
+}
+</style>
+</head>
+<body>
+
+<!-- FIXED PILLAR SHAFTS -->
+<div class="pillar-shaft-fixed left"><div class="shaft-inner"></div></div>
+<div class="pillar-shaft-fixed right"><div class="shaft-inner"></div></div>
+
+<!-- NOTECARD NAV -->
+<nav class="nav-rail" aria-label="Section navigation">
+  <div class="notecards" id="notecards"></div>
+</nav>
+
+<!-- HEADER / FACADE -->
+<header class="site-header">
+  <!--
+    PEDIMENT: triangle peak at top center (500,6).
+    Base corners at (2,198) and (998,198) align with pillar shaft edges,
+    so the fixed shafts below look like they grow straight out of the building.
+    preserveAspectRatio="none" stretches it to full viewport width.
+  -->
+  <svg class="pediment-svg" viewBox="0 0 1000 200" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Triangle fill -->
+    <polygon points="500,6 998,198 2,198" fill="rgba(228,228,225,0.7)"/>
+    <!-- Triangle outer edge -->
+    <polygon points="500,6 998,198 2,198" stroke="rgba(50,50,70,0.32)" stroke-width="2" fill="none"/>
+    <!-- Triangle inner edge -->
+    <polygon points="500,22 978,190 22,190" stroke="rgba(50,50,70,0.1)" stroke-width="1.2" fill="none"/>
+    <!-- Acroteria -->
+    <circle cx="500" cy="6"   r="5" fill="#ebebea" stroke="rgba(160,124,42,0.55)" stroke-width="1.5"/>
+    <circle cx="998" cy="198" r="4" fill="#ebebea" stroke="rgba(50,50,70,0.25)" stroke-width="1"/>
+    <circle cx="2"   cy="198" r="4" fill="#ebebea" stroke="rgba(50,50,70,0.25)" stroke-width="1"/>
+    <!-- Left pillar capital (top of left shaft) -->
+    <rect x="0"   y="170" width="54" height="10" fill="rgba(220,220,214,0.9)" stroke="rgba(50,50,70,0.22)" stroke-width="1"/>
+    <rect x="4"   y="180" width="46" height="6"  fill="rgba(212,212,206,0.9)" stroke="rgba(50,50,70,0.16)" stroke-width="0.8"/>
+    <!-- Right pillar capital -->
+    <rect x="946" y="170" width="54" height="10" fill="rgba(220,220,214,0.9)" stroke="rgba(50,50,70,0.22)" stroke-width="1"/>
+    <rect x="950" y="180" width="46" height="6"  fill="rgba(212,212,206,0.9)" stroke="rgba(50,50,70,0.16)" stroke-width="0.8"/>
+    <!-- Gold accent line along base -->
+    <line x1="0" y1="197" x2="1000" y2="197" stroke="rgba(160,124,42,0.25)" stroke-width="1"/>
+  </svg>
+
+  <!-- Title band -->
+  <div class="entablature">
+         <img src="logo.svg" class="site-logo" alt="My logo">
+    <div class="site-title">The Archive of My Mind</div>
+    <div class="site-subtitle">A personal record of the interior</div>
+  </div>
+  <div class="facade-footer-strip"></div>
+</header>
+
+<!-- PAGE BODY -->
+<div class="page-wrap">
+  <main class="content">
+    <div id="archive-root"></div>
+    <footer class="site-footer">
+      <p class="footer-mark">Foundation Phase &nbsp;·&nbsp; Content Forthcoming</p>
+    </footer>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title-el">
+  <div class="modal-window">
+    <div class="modal-header">
+      <div>
+        <div class="modal-section-label" id="modal-section-label"></div>
+        <div class="modal-title" id="modal-title-el"></div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+
+/* ── BOOK CONTENT ─────────────────────────────────────────────── */
+const BOOK_CONTENT = {
+
+  'on-politics': {
+    tagline: 'A record of what I actually think, not what I am supposed to say.',
+    sections: [
+      {
+        heading: 'Overview',
+        text: 'I lean left. Not because someone told me to, not because it feels cool, but because when I look at what is actually happening and who it is happening to, that is where I land. I treat my political views like a rough draft. The direction feels right. The specific details are still being figured out.'
+      },
+      {
+        heading: 'The Core Idea',
+        text: 'Trump is bad for this country. That is not a hot take at this point, it is just what the record shows. He runs the whole thing like it is about him personally. Loyalty over competence, grievance over governance, and a habit of doing things that would end any other career before breakfast.\n\nThe ICE stuff bothers me the most. Going after people who are not hurting anyone, who are just living here without the right paperwork, and calling it a national security victory is dishonest and cruel. It is treating human beings like a problem to be solved to score points with a base.'
+      },
+      {
+        heading: 'Why I Think This Way',
+        text: 'I am not anti-Republican out of habit. I am against cruelty and dishonesty and I try to apply that evenly. It just so happens that right now one side has made both of those things central to their identity.\n\nThe legal record on Trump is not a matter of opinion. The behavior is documented. At some point continuing to back someone after all of that is not a political stance, it is a choice about what you are personally okay with.\n\nI will also say this: when someone is clearly not at their best and the people around them just keep propping them up because it is useful to them, that is not leadership. That is stubbornness kept on life support.'
+      },
+      {
+        heading: 'Where I Am Uncertain',
+        text: 'I do not think every person who voted for Trump is the same. Some people vote on one issue and tune out everything else. Some are economically desperate and do not feel like anyone else is actually talking to them. That does not make the outcome less bad, but it means I try not to put everyone in the same box even when I want to.\n\nI am also aware I am a teenager. I read a lot and I think about this more than most people my age, but I am not pretending I have it all figured out. My general direction feels solid. The specifics will keep shifting as I learn more.'
+      },
+      {
+        heading: 'What This Means For My Life',
+        text: 'I pay attention even when it is exhausting. How a country treats people with no power is a pretty clear window into what it actually values. I want to know what those values really are, not the version on a poster.\n\nI cannot vote yet. When I can, I will. Until then I stay informed and I do not pretend this is all happening somewhere far away that has nothing to do with me.'
+      },
+      {
+        heading: 'Final Note',
+        text: 'This will not age perfectly and I know that. Things shift, I will learn more, and some of this will probably look different to me in a few years. That is fine. This is just where I actually stand right now, written down honestly. That is the whole point of this archive.'
+      }
+    ]
+  }
+
+};
+
+/* ── SECTIONS ─────────────────────────────────────────────────── */
+const SECTIONS = [
+  {
+    id: 'about', title: 'About Me', roman: 'I',
+    books: [
+      { title: 'Who I Am',             color: 1 },
+      { title: 'Who I Pretend to Be',  color: 4 },
+      { title: 'Who I Want to Become', color: 7 },
+      { title: 'Untitled Volume I',    color: 2 },
+    ]
+  },
+  {
+    id: 'family', title: 'Family & Home', roman: 'II',
+    books: [
+      { title: 'Family',              color: 3 },
+      { title: 'Cats',                color: 8 },
+      { title: 'Home Life',           color: 6 },
+      { title: 'Untitled Volume II',  color: 5 },
+    ]
+  },
+  {
+    id: 'relationships', title: 'Relationships', roman: 'III',
+    books: [
+      { title: 'Friends',             color: 9 },
+      { title: 'Girlfriend',          color: 2 },
+      { title: 'Social Life',         color: 1 },
+      { title: 'Untitled Volume III', color: 7 },
+    ]
+  },
+  {
+    id: 'school', title: 'School & Life Path', roman: 'IV',
+    books: [
+      { title: 'Past School',         color: 4 },
+      { title: 'Current School',      color: 3 },
+      { title: 'Future Plans',        color: 6 },
+      { title: 'Untitled Volume IV',  color: 8 },
+    ]
+  },
+  {
+    id: 'creation', title: 'Creation & Internet Identity', roman: 'V',
+    books: [
+      { title: 'Photography',         color: 5 },
+      { title: 'Online Presence',     color: 2 },
+      { title: 'YouTube',             color: 9 },
+      { title: 'Untitled Volume V',   color: 1 },
+    ]
+  },
+  {
+    id: 'interests', title: 'Interests & Passions', roman: 'VI',
+    books: [
+      { title: 'LEGO',                color: 7 },
+      { title: 'Reading',             color: 4 },
+      { title: 'Extracurriculars',    color: 3 },
+      { title: 'Untitled Volume VI',  color: 6 },
+    ]
+  },
+  {
+    id: 'views', title: 'Views & Beliefs', roman: 'VII',
+    books: [
+      { title: 'On Politics',         color: 8, content: BOOK_CONTENT['on-politics'] },
+      { title: 'AI',                  color: 5 },
+      { title: 'The Future',          color: 2 },
+      { title: 'Religion / Reality',  color: 9 },
+      { title: 'Untitled Volume VII', color: 1 },
+    ]
+  },
+  {
+    id: 'entertainment', title: 'Entertainment & Taste', roman: 'VIII',
+    books: [
+      { title: 'Music Taste',          color: 3 },
+      { title: 'Film Taste',           color: 7 },
+      { title: 'Favorite Things',      color: 4 },
+      { title: 'Untitled Volume VIII', color: 6 },
+    ]
+  },
+];
+
+/* ── LOREM PLACEHOLDER ────────────────────────────────────────── */
+const LOREM = [
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+  'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.',
+  'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa quae ab illo inventore veritatis et quasi architecto.',
+  'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione sequi nesciunt.',
+];
+function lorem(n = 2) {
+  return [...LOREM].sort(() => Math.random() - 0.5).slice(0, n).join(' ');
+}
+
+/* ── BUILD SECTIONS ───────────────────────────────────────────── */
+const archiveRoot = document.getElementById('archive-root');
+
+SECTIONS.forEach((sec, idx) => {
+  const section = document.createElement('section');
+  section.className = 'archive-section';
+  section.id = sec.id;
+  section.dataset.section = sec.id;
+
+  const header = document.createElement('div');
+  header.className = 'section-header';
+  header.innerHTML = `
+    <span class="section-numeral">${sec.roman}</span>
+    <span class="section-title">${sec.title}</span>
+    <span class="section-rule"></span>
+  `;
+  section.appendChild(header);
+
+  const shelf = document.createElement('div');
+  shelf.className = 'bookshelf';
+
+  sec.books.forEach(book => {
+    const el = document.createElement('div');
+    el.className = 'book';
+    el.setAttribute('data-color', book.color);
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', 'Open: ' + book.title);
+    el.innerHTML = '<div class="book-spine"><span class="book-spine-text">' + book.title + '</span></div>';
+    el.addEventListener('click', () => openModal(book.title, sec.title, book.content || null));
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') openModal(book.title, sec.title, book.content || null);
+    });
+    shelf.appendChild(el);
+  });
+
+  section.appendChild(shelf);
+
+  if (idx < SECTIONS.length - 1) {
+    const div = document.createElement('div');
+    div.className = 'section-divider';
+    div.innerHTML = '<span class="divider-line"></span><span class="divider-ornament">&#10022;</span><span class="divider-line"></span>';
+    section.appendChild(div);
+  }
+
+  archiveRoot.appendChild(section);
+});
+
+/* ── BUILD NOTECARDS ──────────────────────────────────────────── */
+const notecardsEl = document.getElementById('notecards');
+
+SECTIONS.forEach(sec => {
+  const card = document.createElement('div');
+  card.className = 'notecard';
+  card.dataset.target = sec.id;
+  card.setAttribute('role', 'button');
+  card.setAttribute('tabindex', '0');
+  card.innerHTML = '<span class="notecard-text">' + sec.title + '</span>';
+  card.addEventListener('click', () => {
+    document.getElementById(sec.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  card.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById(sec.id)?.scrollIntoView({ behavior: 'smooth' });
+  });
+  notecardsEl.appendChild(card);
+});
+
+/* ── INTERSECTION OBSERVER ────────────────────────────────────── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const id = entry.target.dataset.section;
+    document.querySelectorAll('.notecard').forEach(c => c.classList.remove('active'));
+    const active = document.querySelector('.notecard[data-target="' + id + '"]');
+    if (active) active.classList.add('active');
+  });
+}, { rootMargin: '-10% 0px -60% 0px', threshold: 0 });
+
+document.querySelectorAll('.archive-section').forEach(s => io.observe(s));
+
+/* ── MODAL ────────────────────────────────────────────────────── */
+const overlay  = document.getElementById('modal-overlay');
+const titleEl  = document.getElementById('modal-title-el');
+const labelEl  = document.getElementById('modal-section-label');
+const bodyEl   = document.getElementById('modal-body');
+const closeBtn = document.getElementById('modal-close');
+
+function openModal(bookTitle, sectionTitle, content) {
+  titleEl.textContent = bookTitle;
+  labelEl.textContent = sectionTitle;
+
+  if (content) {
+    let html = '<div class="modal-tagline">' + content.tagline + '</div>';
+    content.sections.forEach(s => {
+      html += '<div class="modal-section-heading">' + s.heading + '</div>';
+      s.text.split('\n\n').forEach(para => {
+        if (para.trim()) html += '<p>' + para.trim() + '</p>';
+      });
+    });
+    bodyEl.innerHTML = html;
+  } else {
+    bodyEl.innerHTML =
+      '<div class="modal-placeholder-tag">Placeholder &nbsp;&middot;&nbsp; Content forthcoming</div>' +
+      '<p class="placeholder-text">' + lorem(2) + '</p>' +
+      '<p class="placeholder-text">' + lorem(2) + '</p>' +
+      '<p class="placeholder-text">' + lorem(1) + '</p>';
+  }
+
+  bodyEl.scrollTop = 0;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+closeBtn.addEventListener('click', closeModal);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+</script>
+</body>
+</html>
