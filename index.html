@@ -273,10 +273,13 @@ body.dark .site-logo {
 /* ── PAGE LAYOUT ── */
 .page-wrap { display: flex; justify-content: center; }
 .content {
+  /* left margin = nav width so content doesn't hide under notecards.
+     right margin matches it so the content block is truly centered on screen. */
   margin-left: var(--nav-w);
-  flex: 1;
-  padding: 48px 64px 100px;
+  margin-right: var(--nav-w);
+  width: 100%;
   max-width: 760px;
+  padding: 48px 48px 100px;
   min-width: 0;
 }
 
@@ -637,6 +640,40 @@ const BOOK_CONTENT = {
         text: 'This will not age perfectly and I know that. Things shift, I will learn more, and some of this will probably look different to me in a few years. That is fine. This is just where I actually stand right now, written down honestly. That is the whole point of this archive.'
       }
     ]
+  },
+
+  'religion-reality': {
+    tagline: 'I will never tell you your god is not real. I just personally doubt it. Most of the time.',
+    sections: [
+      {
+        heading: 'Overview',
+        text: 'I do not believe in god. Mostly. That qualifier matters because I am being honest, and the honest answer is not a clean yes or no. I believe in science, in how the universe actually works, in how things fit together. That framework makes more sense to me than any creation story I have encountered. But I am not willing to say with total certainty that there is nothing out there. I just doubt it.'
+      },
+      {
+        heading: 'The Core Idea',
+        text: 'Science holds up. It has evidence, it gets tested, it gets revised when the evidence changes. "God said it and it was" is not an explanation I find satisfying when there is a more coherent one available. That is not me being disrespectful. It is just where the logic takes me.\n\nThat said, there is still a small part of me that thinks: maybe. Not probably. Not even close. But maybe. I cannot fully rule out that something exists beyond what we currently understand. I just do not think it looks like anything any current religion has described.'
+      },
+      {
+        heading: 'On Religion Specifically',
+        text: 'Catholicism is built on top of older religions. The devil with horns and a pitchfork is not in the Bible. Those horns and that trident came from pagan imagery, borrowed and reframed over centuries. That kind of thing matters to me. It shows that these belief systems evolve and absorb and change, which makes it harder to treat any one version as the definitive truth.\n\nAnd if you believe your god is real, what about the ones before? The Greek and Roman gods, the Norse pantheon, the Egyptian gods. People believed in those just as sincerely. The Bible we read now was written and compiled long after the stories of those older gods. So what makes this one the right one? I genuinely want someone to answer that without falling back on faith alone.'
+      },
+      {
+        heading: 'What I Think God Actually Is',
+        text: 'If there is a god, I think the actual message is pretty simple regardless of the tradition. Love everyone. Treat people as equals. Take care of what exists around you. Be a decent person. That is it. That is the whole thing.\n\nIt is not complicated. And yet people use that same god to justify treating others as less than human. That contradiction bothers me more than the theology does. If your religion leads you to cruelty, something went wrong somewhere.'
+      },
+      {
+        heading: 'Heaven, Hell, and What Comes After',
+        text: 'If any of it is real, here is what I think: we are already in purgatory. This is it. And hell is not a pit of fire. I think of it more like a difficult school. You go there, you work through what you failed to work through here, you learn, and then you come back and try again. Reincarnation as a second draft.\n\nAnd heaven, if it exists, is not a place where everything is perfect and nothing ever happens. That sounds awful honestly. I think it is more like a better version of this, still with challenges, still with something to do, just with less weight on it.\n\nAlso: there is no version of a universe this large where we are the only ones in it. That is not faith, that is just math.'
+      },
+      {
+        heading: 'How I Actually Live With This',
+        text: 'I will go to mass if the situation calls for it. I received communion. I respect prayer and I respect worship. I do not walk into those spaces looking to argue or feeling superior. What people believe is theirs, and as long as it is not being used to hurt someone, I have no issue with it.\n\nMy one rule is pretty simple: if it does not hurt you or anyone else, it is fine by me. That applies to religion the same as anything.\n\nI will never tell someone their god is not real. That is not my place. Nobody actually knows. We believe or we do not, and we live with the uncertainty either way. Maybe one day we will have a clearer answer. Until then it stays in the maybe column.'
+      },
+      {
+        heading: 'Final Note',
+        text: 'This is not me rejecting spirituality. It is me being honest about where I land when I think it through carefully. Religion at its best asks people to be kind, humble, and thoughtful. I am fully on board with all of that. I just arrive at it from a different direction.'
+      }
+    ]
   }
 
 };
@@ -703,7 +740,7 @@ const SECTIONS = [
       { title: 'On Politics',         color: 8, content: BOOK_CONTENT['on-politics'] },
       { title: 'AI',                  color: 5 },
       { title: 'The Future',          color: 2 },
-      { title: 'Religion / Reality',  color: 9 },
+      { title: 'On Religion',         color: 9, content: BOOK_CONTENT['religion-reality'] },
       { title: 'Untitled Volume VII', color: 1 },
     ]
   },
